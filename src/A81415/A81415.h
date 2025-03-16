@@ -482,11 +482,33 @@ extern "C" {
 #define REG_WSIDATA1_WSI_STANDSTILL_MASK (1 << 1)
 #define REG_WSIDATA1_DATA_READ_MASK      (1 << 0)
 
+/**
+ * @brief Builds a command word for the A81415 device.
+ *
+ * @param Command The command type (read or write).
+ * @param Address The target register address.
+ * @param Data The data value to be written.
+ * @return The complete 32-bit command word.
+ */
 uint32_t A81415BuildCommand(uint8_t Command, uint8_t Address, uint16_t Data);
 
+/**
+ * @brief Transfers a series of commands via SPI.
+ *
+ * @param Size The number of commands to transfer.
+ * @param Commands Pointer to the commands array.
+ */
 void A81415Transfer(uint32_t Size, uint32_t *Commands);
 
-uint8_t A81415CheckCRC(uint32_t Data);
+/**
+ * @brief Processes the response from the A81415 device.
+ *
+ * @param Response The 32-bit response received.
+ * @param pAddress Pointer to store the extracted address.
+ * @param pData Pointer to store the extracted data.
+ * @return Non-zero if the response is valid; zero otherwise.
+ */
+uint8_t A81415GetResponse(uint32_t Response, uint8_t* pAddress, uint16_t* pData);
 
 #if defined(__cplusplus)
 }

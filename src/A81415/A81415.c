@@ -18,8 +18,17 @@
 //
 //---------------------------------------------------------------------------------------------------------------------
 #include <stdint.h>
+#include "../spi.h"
 #include "A81415.h"
 
+/**
+ * @brief Calculates a 5-bit CRC for the given data.
+ *
+ * Uses the polynomial 0x12 (x^5 + x^2 + 1) with an initial CRC value of 0x1F.
+ *
+ * @param data The input data for the CRC calculation.
+ * @return The computed 5-bit CRC.
+ */
 uint8_t calculate_crc(uint32_t data) {
     // Polynomial: 0x12 (x^5 + x^2 + 1) in binary: 10010
     uint8_t polynomial = 0x12;
@@ -46,6 +55,16 @@ uint8_t calculate_crc(uint32_t data) {
     return crc & 0x1F;
 }
 
+/**
+ * @brief Builds a command word for the A81415 device.
+ *
+ * Constructs a 32-bit command combining command, address, data, and CRC.
+ *
+ * @param Command The command type (read or write).
+ * @param Address The target register address.
+ * @param Data The data to be transmitted.
+ * @return The complete 32-bit command.
+ */
 uint32_t A81415BuildCommand(uint8_t Command, uint8_t Address, uint16_t Data) {
     uint32_t request;
     request = ((uint32_t)Command) << 30;
@@ -55,17 +74,45 @@ uint32_t A81415BuildCommand(uint8_t Command, uint8_t Address, uint16_t Data) {
     return request;
 }
 
-uint8_t A81415CheckCRC(uint32_t Data) {
-    uint8_t crc = calculate_crc(Data);
-    if (crc == A81415_RES_CRC(Data)) {
-        return 1;
-    } else {
+/**
+ * @brief Processes the response from the A81415 device.
+ *
+ * Validates the response by verifying its CRC and extracts the address and data.
+ *
+ * @param Response The 32-bit response word.
+ * @param pAddress Pointer to store the command address.
+ * @param pData Pointer to store the extracted data.
+ * @return Non-zero if the response is valid; otherwise, zero.
+ */
+uint8_t A81415GetResponse(uint32_t Response, uint8_t *pAddress, uint16_t *pData) {
+    uint8_t crc = calculate_crc(Response);
+    if (crc != A81415_RES_CRC(Response)) {
         return 0;
     }
+    if (0 == (Response & (1 << A81415_RES_FAULTFLAG_OFFSET))) {
+        return 0;
+    }
+    if (pAddress) {
+        if (A81415_RES_DATAOK(Response) == 0) {
+            *pAddress = A81415_REG_STATUS0;
+        } else {
+            *pAddress = A81415_RES_ADDRESS(Response);
+        }
+    }
+    if (pData) {
+        *pData = A81415_RES_DATA(Response);
+    }
+    return 1;
 }
 
-#include "../CH347/spi.h"
-
+/**
+ * @brief Transfers a sequence of SPI commands to the A81415 device.
+ *
+ * Initiates the SPI transfer of the first command, then continues for the rest.
+ *
+ * @param Size The number of commands to transfer.
+ * @param Commands Pointer to the commands array.
+ */
 void A81415Transfer(uint32_t Size, uint32_t* Commands) {
     uint32_t* pResponse = Commands;
     spi_transfer(*(Commands++));

@@ -48,7 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\CH347\CH347DLL.H" />
-    <ClInclude Include="..\CH347\spi.h" />
+    <ClInclude Include="..\spi.h" />
     <ClInclude Include="A81415.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

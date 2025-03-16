@@ -29,14 +29,14 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\CH347\spi.h">
-      <Filter>CH347</Filter>
-    </ClInclude>
     <ClInclude Include="A81415.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="..\CH347\CH347DLL.H">
       <Filter>CH347</Filter>
+    </ClInclude>
+    <ClInclude Include="..\spi.h">
+      <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

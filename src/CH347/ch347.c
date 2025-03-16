@@ -19,7 +19,7 @@
 //---------------------------------------------------------------------------------------------------------------------
 #include <stdint.h>
 #include <stdio.h>
-#include "spi.h"
+#include "../spi.h"
 #include <windows.h>
 #include "CH347DLL.h"
 
@@ -83,7 +83,7 @@ uint32_t spi_transfer(uint32_t data) {
     if (hDevice != INVALID_HANDLE_VALUE) {
         CH347SPI_WriteRead(0, 0x80, 4, &result);
     } else {
-        result = swapbyte(0b10111100100101101001011010110101);
+        result = swapbyte(0b10111100110101101001011010101011);
     }
     result = swapbyte(result);
     printf("SPI send: 0x%08X, receive: 0x%08X\n", data, result);
